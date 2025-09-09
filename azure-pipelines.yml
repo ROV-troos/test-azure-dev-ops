@@ -47,7 +47,7 @@ stages:
           # Push branch 'test' naar Azure DevOps repo
           - script: |
               echo "Voeg Azure DevOps repo toe als remote"
-              git remote add azure https://$(System.AccessToken)@spfbeheer.visualstudio.com/InSeDa/_git/InSeDa
+              git remote add azure https://$(System.AccessToken)@dev.azure.com/spfbeheer/InSeDa/_git/InSeDa
 
               echo "Push branch 'test' naar Azure DevOps"
               git push -u azure test --force
