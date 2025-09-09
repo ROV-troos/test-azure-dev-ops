@@ -1,0 +1,30 @@
+trigger: 
+  branches: 
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+resources:
+  repositories:
+    - repository: githubRepo
+      type: github
+      name: ROV-troos/test-azure-dev-ops
+      ref: main
+      endpoint: GitHubConnection
+
+stages:
+  - stage: Test
+    displayName: "Test GitHub integration"
+    jobs:
+      - job: GitRemap
+        steps:
+          - checkout: githubRepo
+          - script: |
+              echo "Verplaats GitHub main naar lokale test branch"
+              git branch -M test
+              git checkout test
+              echo "Actieve branch:"
+              git branch
+            displayName: "Maak test branch uit main"
