@@ -12,17 +12,26 @@ resources:
       type: github
       name: ROV-troos/test-azure-dev-ops
       ref: main
-      endpoint: ROV-troos
+      endpoint: ROV-troos   # jouw GitHub service connection
 
 stages:
-  - stage: Test
-    displayName: "Test GitHub integration"
+  - stage: CopyMainToTest
+    displayName: "Kopieer GitHub main naar Azure DevOps test branch"
     jobs:
-      - job: GitRemap
+      - job: GitBranchSync
+        displayName: "Maak en push test branch"
         steps:
+          # Haal GitHub repo binnen
           - checkout: githubRepo
+
+          # Configureer Git identity
           - script: |
-              # Check of test lokaal bestaat, zo niet maak hem aan
+              git config user.email "azure-pipeline@example.com"
+              git config user.name "Azure Pipeline"
+            displayName: "Configureer Git"
+
+          # Zorg dat lokale branch 'test' bestaat
+          - script: |
               if git show-ref --verify --quiet refs/heads/test; then
                 echo "Local branch 'test' bestaat al"
                 git checkout test
@@ -33,4 +42,15 @@ stages:
 
               echo "Actieve branch:"
               git branch
-            displayName: "Zorg dat lokale test branch bestaat"
+            displayName: "Maak lokale test branch"
+
+          # Push branch 'test' naar Azure DevOps repo
+          - script: |
+              echo "Voeg Azure DevOps repo toe als remote"
+              git remote add azure https://$(System.AccessToken)@dev.azure.com/$(System.CollectionUri)/$(System.TeamProject)/_git/$(Build.Repository.Name)
+
+              echo "Push branch 'test' naar Azure DevOps"
+              git push -u azure test --force
+            displayName: "Push test branch naar Azure DevOps"
+            env:
+              System_AccessToken: $(System.AccessToken)
