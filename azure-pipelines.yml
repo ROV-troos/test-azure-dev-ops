@@ -21,16 +21,13 @@ stages:
       - job: GitBranchSync
         displayName: "Maak en push test branch"
         steps:
-          # Haal GitHub repo binnen
           - checkout: githubRepo
 
-          # Configureer Git identity
           - script: |
               git config user.email "azure-pipeline@example.com"
               git config user.name "Azure Pipeline"
             displayName: "Configureer Git"
 
-          # Zorg dat lokale branch 'test' bestaat
           - script: |
               if git show-ref --verify --quiet refs/heads/test; then
                 echo "Local branch 'test' bestaat al"
@@ -44,13 +41,33 @@ stages:
               git branch
             displayName: "Maak lokale test branch"
 
-          # Push branch 'test' naar Azure DevOps repo
           - script: |
-              echo "Voeg Azure DevOps repo toe als remote"
-              git remote add azure https://$(System.AccessToken)@dev.azure.com/spfbeheer/InSeDa/_git/InSeDa
+              echo "Probeer push met verschillende URL-varianten..."
 
-              echo "Push branch 'test' naar Azure DevOps"
-              git push -u azure test --force
-            displayName: "Push test branch naar Azure DevOps"
+              set -e  # stop bij fout
+              SUCCESS=0
+
+              for REMOTE in \
+                "https://$(System.AccessToken)@dev.azure.com/spfbeheer/InSeDa/_git/InSeDa" \
+                "https://$(System.AccessToken)@spfbeheer.visualstudio.com/InSeDa/_git/InSeDa"
+              do
+                echo "==> Test remote: $REMOTE"
+                git remote remove azure || true
+                git remote add azure $REMOTE
+
+                if git push -u azure test --force; then
+                  echo "✅ Push geslaagd met: $REMOTE"
+                  SUCCESS=1
+                  break
+                else
+                  echo "❌ Push gefaald met: $REMOTE"
+                fi
+              done
+
+              if [ $SUCCESS -eq 0 ]; then
+                echo "❌ Geen van de URL's werkte."
+                exit 1
+              fi
+            displayName: "Push test branch naar Azure DevOps (probeer meerdere URL's)"
             env:
               System_AccessToken: $(System.AccessToken)
