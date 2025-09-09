@@ -22,9 +22,6 @@ stages:
         steps:
           - checkout: githubRepo
           - script: |
-              echo "Verplaats GitHub main naar lokale test branch"
-              git branch -M test
-              git checkout test
-              echo "Actieve branch:"
-              git branch
-            displayName: "Maak test branch uit main"
+              git remote add azure https://$(System.AccessToken)@dev.azure.com/{org}/{project}/_git/{repo}
+              git push azure test
+            displayName: "Push test branch naar Azure DevOps"
