@@ -12,7 +12,7 @@ resources:
       type: github
       name: ROV-troos/test-azure-dev-ops
       ref: main
-      endpoint: ROV-troos   # jouw GitHub service connection
+      endpoint: ROV-troos   # GitHub service connection
 
 stages:
   - stage: CopyMainToTest
@@ -47,7 +47,7 @@ stages:
           # Push branch 'test' naar Azure DevOps repo
           - script: |
               echo "Voeg Azure DevOps repo toe als remote"
-              git remote add azure https://$(System.AccessToken)@dev.azure.com/$(System.CollectionUri)/$(System.TeamProject)/_git/$(Build.Repository.Name)
+              git remote add azure https://$(System.AccessToken)@spfbeheer.visualstudio.com/InSeDa/_git/InSeDa
 
               echo "Push branch 'test' naar Azure DevOps"
               git push -u azure test --force
