@@ -22,6 +22,15 @@ stages:
         steps:
           - checkout: githubRepo
           - script: |
-              git remote add azure https://$(System.AccessToken)@dev.azure.com/{org}/{project}/_git/{repo}
-              git push azure test
-            displayName: "Push test branch naar Azure DevOps"
+              # Check of test lokaal bestaat, zo niet maak hem aan
+              if git show-ref --verify --quiet refs/heads/test; then
+                echo "Local branch 'test' bestaat al"
+                git checkout test
+              else
+                echo "Maak nieuwe lokale branch 'test'"
+                git checkout -b test
+              fi
+
+              echo "Actieve branch:"
+              git branch
+            displayName: "Zorg dat lokale test branch bestaat"
