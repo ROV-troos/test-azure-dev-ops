@@ -12,7 +12,7 @@ resources:
       type: github
       name: ROV-troos/test-azure-dev-ops
       ref: main
-      endpoint: GitHubConnection
+      endpoint: ROV-troos
 
 stages:
   - stage: Test
